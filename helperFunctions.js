@@ -8,7 +8,7 @@ const options = {  // Randomised number of seconds to wait
 	integer: true
 	};
 
-var activeNumberOfRequests = {'POST':0,'GET':0,'PUT':0,'DELETE':0};
+var activeNumberOfRequests = {'POST':0,'GET':0,'PUT':0,'DELETE':0}; // Will Update this on a new request.
 
 global.values = {}; // Values corresponding to Method of request. 
 		// 0 - Number of total requests
@@ -18,7 +18,7 @@ global.values = {}; // Values corresponding to Method of request.
 		// > 4 - (Time of request, response time) for the requests posted in the last 1 hour.
 
 
-function ParseTime(date)
+function ParseTime(date) // Finding the string with time.
 {
 	var hour = date.getHours();
     	hour = (hour < 10 ? "0" : "") + hour;
@@ -30,7 +30,7 @@ function ParseTime(date)
 	return time;
 }
 
-function DeleteStorage()
+function DeleteStorage() // In case the previously stored values are corrupted, delete them.
 {
 	//storage.init();
 	storage.forEach( async function(datum){
@@ -43,12 +43,12 @@ module.exports.activeNumberOfRequests = activeNumberOfRequests;
 module.exports = {
 
 
-PopulateValue : function() // Populate the array with values from Persistant db.
+PopulateValue : function() // Populate the array with values from Persistent db.
 {
 	storage.init();
 	storage.forEach( async function(datum){
 		var item = storage.getItem[datum.key];
-		if(item!=null && item.length >=4)
+		if(item!=null && item.length >=4) 
 		{
 			for(var i =0;i < 4; i++)
 			{
@@ -59,7 +59,7 @@ PopulateValue : function() // Populate the array with values from Persistant db.
 					return;	
 				}
 			}
-			values[datum.key] = datum.value;
+			values[datum.key] = datum.value;  // Data is not corrupted
 		}
 		else
 		{
@@ -77,17 +77,13 @@ UpdateActiveNumberOfRequests : function(method, increment)
 },
 
 SetValues : function(method, duration, date)
-{
-	console.log(method + ' ' + duration + ' ' + date);	
+{	
 	if(!(method in values) || values[method].length <4)
 	{
-		console.log('Here\n');
-	//storage.init();
 		var finalValue = [1,parseInt(duration),1,parseInt(duration),[date,parseInt(duration)]];
 		let promise = storage.getItem(method);
 		promise.then( function(value)
 			{
-			console.log('Here1\n');
 			finalValue[0] = value[0] + 1;
 			finalValue[1] = value[1] + duration;
 			finalValue[2] = value[2] + 1;
@@ -95,7 +91,6 @@ SetValues : function(method, duration, date)
 			finalValue.push([date,parseInt(duration)]);
 			storage.setItem(method, finalValue);
 			}, function(reason) {
-			console.log('Here2\n');
 			storage.setItem(method, finalValue);
 				}	
 		);
@@ -103,7 +98,6 @@ SetValues : function(method, duration, date)
 	}
 	else
 	{
-		console.log('Here3\n');
 		values[method][0] = values[method][0] + 1;
 		values[method][1] = values[method][1] + duration;
 		values[method][2] = values[method][2] + 1;
